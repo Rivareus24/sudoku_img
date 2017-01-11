@@ -1,4 +1,4 @@
-function sudokuDritto = sudokuRotation(main_Properties, box, original_rows, original_cols, original_img)
+function angle = sudokuRotation(main_Properties, box, original_rows, original_cols, original_img)
 
 
 
@@ -8,11 +8,9 @@ function sudokuDritto = sudokuRotation(main_Properties, box, original_rows, orig
     %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     main_ConvexImg = main_Properties(box).ConvexImage;
+    %figure, imshow(main_ConvexImg);
     main_Bordo = round(main_Properties(box).BoundingBox);
-    mask = zeros(original_rows, original_cols);
-    mask(main_Bordo(2):main_Bordo(2)+main_Bordo(4), main_Bordo(1):main_Bordo(1)+main_Bordo(3)) = 1;
-    temp_img = mask .* original_img;
-    temp_img = imcrop(temp_img, [main_Bordo(1) main_Bordo(2) main_Bordo(3) main_Bordo(4)]);
+    temp_img = imcrop(original_img, [main_Bordo(1)-5 main_Bordo(2)-5 main_Bordo(3) + 10 main_Bordo(4) + 10]);
 
     pixels = size(main_ConvexImg, 1) * size(main_ConvexImg, 2);
     temp = 1 - main_ConvexImg;
@@ -67,28 +65,40 @@ function sudokuDritto = sudokuRotation(main_Properties, box, original_rows, orig
         ruotataPrec = R_ConvexImg;
 
     end
-    %temp_img = imrotate(temp_img, angle, 'bilinear');
+    %figure, imshow(temp_img);
+    %[row_temp_img, col_temp_img, ~] = size(temp_img)
 
-    angle2 = angle;
-    angle2 = deg2rad(angle2);
-    c = cos(abs(angle2));
-    s = sin(abs(angle2));
+    %media = mean2(temp_img);
+    %temp_img = imrotate(temp_img, angle, 'bilinear');
+    %temp_img = rgb2gray(temp_img);
+    %figure, imshow(temp_img);
+
+
+
+    %temp_img(temp_img ~= 0) = 1;
+    %figure, imshow(temp_img);
+
+
+    %rad = deg2rad(angle);
+    %t = tan(abs(rad));
+    %c = cos(abs(rad));
+    %s = sin(abs(rad));
+
+    %cateto = max(row_temp_img, col_temp_img) / (t + 1)
+    %cateto2 = min(row_temp_img, col_temp_img) - cateto
+    %ipotenusa = (cateto^2 + cateto2^2)^(1/2)
+    %temp_img = imcrop(temp_img, [cateto cateto2 ipotenusa ipotenusa]);
+
+    %figure, imshow(temp_img), title('AAAAAAAAAAAAAAAAAAAAaa');
+
     %nuove = [main_Bordo(1), main_Bordo(2)] * [c -s;s c];
     %nuove = abs(nuove)
-    nuove(1)  = original_rows * s
-    nuove(2) = main_Bordo(2) / c
-    c
-    s
-    main_Bordo(2)
-    angle
+    %nuove(1)  = original_rows * s;
+    %nuove(2) = main_Bordo(2) / c;
 
-    temp_img = imrotate(original_img, angle, 'bilinear');
+    %temp_img = imrotate(original_img, angle, 'bilinear', 'crop');
 
-    figure, imshow(temp_img);
+    %figure, imshow(temp_img);
     %figure, imshow(original_img);
-
-    temp_img = imcrop(temp_img, [nuove(1) nuove(2) 1000 1000]);
-    sudokuDritto = temp_img;
-
 
 end
