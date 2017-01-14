@@ -109,8 +109,8 @@ angle = Sudoku_Rotation(Sudoku.CI);
 Sudoku.Img = imrotate(Sudoku.Img, angle, 'bilinear');
 Show_Img(Sudoku.Img, 'Sudoku Dritto');
 
-
-clear angle
+ = regionprops(Sudoku.Img, ...
+    'EulerNumber', 'Area', 'ConvexImage', 'BoundingBox');
 
 
 %%%%%%%%%%%%%%%%%%%% Salvo l'immagine da croppare

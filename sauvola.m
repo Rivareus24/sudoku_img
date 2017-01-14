@@ -1,13 +1,13 @@
 %SAUVOLA local thresholding.
-%   BW = SAUVOLA(IMAGE) performs local thresholding of a two-dimensional 
+%   BW = SAUVOLA(IMAGE) performs local thresholding of a two-dimensional
 %   array IMAGE with Sauvola algorithm.
-%      
-%   BW = SAUVOLA(IMAGE, [M N], THRESHOLD, PADDING) performs local 
-%   thresholding with M-by-N neighbourhood (default is 3-by-3) and 
-%   threshold THRESHOLD between 0 and 1 (default is 0.34). 
-%   To deal with border pixels the image is padded with one of 
+%
+%   BW = SAUVOLA(IMAGE, [M N], THRESHOLD, PADDING) performs local
+%   thresholding with M-by-N neighbourhood (default is 3-by-3) and
+%   threshold THRESHOLD between 0 and 1 (default is 0.34).
+%   To deal with border pixels the image is padded with one of
 %   PADARRAY options (default is 'replicate').
-%       
+%
 %   Example
 %   -------
 %       imshow(sauvola(imread('eight.tif'), [150 150]));
@@ -26,9 +26,9 @@ if numvarargs > 3
     error('myfuns:somefun2Alt:TooManyInputs', ...
      'Possible parameters are: (image, [m n], threshold, padding)');
 end
- 
+
 optargs = {[3 3] 0.34 'replicate'}; % set defaults
- 
+
 optargs(1:numvarargs) = varargin;   % use memorable variable names
 [window, k, padding] = optargs{:};
 
@@ -54,26 +54,26 @@ output = (image > threshold);
 
 function image=averagefilter(image, varargin)
 %AVERAGEFILTER 2-D mean filtering.
-%   B = AVERAGEFILTER(A) performs mean filtering of two dimensional 
-%   matrix A with integral image method. Each output pixel contains 
+%   B = AVERAGEFILTER(A) performs mean filtering of two dimensional
+%   matrix A with integral image method. Each output pixel contains
 %   the mean value of the 3-by-3 neighborhood around the corresponding
-%   pixel in the input image. 
+%   pixel in the input image.
 %
 %   B = AVERAGEFILTER(A, [M N]) filters matrix A with M-by-N neighborhood.
-%   M defines vertical window size and N defines horizontal window size. 
-%   
-%   B = AVERAGEFILTER(A, [M N], PADDING) filters matrix A with the 
-%   predefinned padding. By default the matrix is padded with zeros to 
+%   M defines vertical window size and N defines horizontal window size.
+%
+%   B = AVERAGEFILTER(A, [M N], PADDING) filters matrix A with the
+%   predefinned padding. By default the matrix is padded with zeros to
 %   be compatible with IMFILTER. But then the borders may appear distorted.
 %   To deal with border distortion the PADDING parameter can be either
-%   set to a scalar or a string: 
+%   set to a scalar or a string:
 %       'circular'    Pads with circular repetition of elements.
 %       'replicate'   Repeats border elements of matrix A.
-%       'symmetric'   Pads array with mirror reflections of itself. 
+%       'symmetric'   Pads array with mirror reflections of itself.
 %
 %   Comparison
 %   ----------
-%   There are different ways how to perform mean filtering in MATLAB. 
+%   There are different ways how to perform mean filtering in MATLAB.
 %   An effective way for small neighborhoods is to use IMFILTER:
 %
 %       I = imread('eight.tif');
@@ -81,7 +81,7 @@ function image=averagefilter(image, varargin)
 %       J = imfilter(I, meanFilter);
 %       figure, imshow(I), figure, imshow(J)
 %
-%   However, IMFILTER slows down with the increasing size of the 
+%   However, IMFILTER slows down with the increasing size of the
 %   neighborhood while AVERAGEFILTER processing time remains constant.
 %   And once one of the neighborhood dimensions is over 21 pixels,
 %   AVERAGEFILTER is faster. Anyway, both IMFILTER and AVERAGEFILTER give
@@ -90,8 +90,8 @@ function image=averagefilter(image, varargin)
 %   Remarks
 %   -------
 %   The output matrix type is the same as of the input matrix A.
-%   If either dimesion of the neighborhood is even, the dimension is 
-%   rounded down to the closest odd value. 
+%   If either dimesion of the neighborhood is even, the dimension is
+%   rounded down to the closest odd value.
 %
 %   Example
 %   -------
@@ -111,7 +111,7 @@ if numvarargs > 2
     error('myfuns:somefun2Alt:TooManyInputs', ...
         'requires at most 2 optional inputs');
 end
- 
+
 optargs = {[3 3] 0};            % set defaults for optional inputs
 optargs(1:numvarargs) = varargin;
 [window, padding] = optargs{:}; % use memorable variable names

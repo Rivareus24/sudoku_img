@@ -1,16 +1,8 @@
 function out = LocalGammaCorrection(im)
 
-    clear massimo;
+    %clear massimo;
     im = double(im);
 
-    im = rgb2hsv(im);
-
-    H = im(:,:,1);
-    S = im(:,:,2);
-    V = im(:,:,3);
-    %V = V / 255;
-    %figure(), subplot(1, 2, 1), imshow(V), title('Originale');
-    %V = V * 255;
     pad = padarray(V, [2 2], 'symmetric');
 
 
