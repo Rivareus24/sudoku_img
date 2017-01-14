@@ -1,0 +1,37 @@
+%%%%%%%% History
+
+%figure, imshow(temp_img);
+%[row_temp_img, col_temp_img, ~] = size(temp_img)
+
+%media = mean2(temp_img);
+%temp_img = imrotate(temp_img, angle, 'bilinear');
+%temp_img = rgb2gray(temp_img);
+%figure, imshow(temp_img);
+
+
+
+%temp_img(temp_img ~= 0) = 1;
+%figure, imshow(temp_img);
+
+
+%rad = deg2rad(angle);
+%t = tan(abs(rad));
+%c = cos(abs(rad));
+%s = sin(abs(rad));
+
+%cateto = max(row_temp_img, col_temp_img) / (t + 1)
+%cateto2 = min(row_temp_img, col_temp_img) - cateto
+%ipotenusa = (cateto^2 + cateto2^2)^(1/2)
+%temp_img = imcrop(temp_img, [cateto cateto2 ipotenusa ipotenusa]);
+
+%figure, imshow(temp_img), title('AAAAAAAAAAAAAAAAAAAAaa');
+
+%nuove = [main_Bordo(1), main_Bordo(2)] * [c -s;s c];
+%nuove = abs(nuove)
+%nuove(1)  = original_rows * s;
+%nuove(2) = main_Bordo(2) / c;
+
+%temp_img = imrotate(original_img, angle, 'bilinear', 'crop');
+
+%figure, imshow(temp_img);
+%figure, imshow(original_img);

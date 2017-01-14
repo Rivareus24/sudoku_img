@@ -3,12 +3,29 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 close all, clear all, clc;
-num = 29;
-for manolo = num : num
 
-[original_rows, original_cols, original_img] = read_Img(manolo);
-img = original_img;     % copia in RGB
-original_img = im2double(original_img);
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% PRE PROCESSING
+%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%% Scelgo l'immagine dal dataset immagini/
+path = string('immagini/');
+img_Number = 29
+extension = ('.jpg');
+
+%%%%%%%%%%%%%%%%%%%% Leggo l'immagine
+[img_downScaled, img_HD] = ...
+    read_Img(path, img_Number, extension);
+%%%%%%%%%%%%%%%%%%%% Clean Workspace
+clear path, clear img_Number, clear extension;
+
+%%%%%%%%%%%%%%%%%%%% Struct dell'immagine down scale-ata
+[original_rows, original_cols, ~] = size(img_downScaled);
+Img_DownScaled = struct('rows', original_rows, 'cols', original_cols);
+
+img = img_downScaled;           %%%%%%%%%% WARNING
+
+img_HD = im2double(img_HD);     %%%%%%%%%% WARNING
 
 hsv = rgb2hsv(img);
 s = hsv(:, :, 2);
@@ -48,9 +65,9 @@ main_Properties = regionprops(main_Labels, 'ConvexImage', 'EulerNumber', 'Boundi
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 %++++++++++++++++++ SCELTA COMPONENTE CORRETTA ++++++++++++++++++++++
 %++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-tempArea = [];
 tempIndex = [];
 tempEuler = [];
+tempArea = [];
 
 for i = 1 : main_N
     if main_Properties(i).EulerNumber < -20
@@ -78,7 +95,7 @@ end
 
     stacco = 10;
 
-    img = imcrop(original_img, [main_Bordo(1)-stacco main_Bordo(2)-stacco main_Bordo(3)+stacco*2 main_Bordo(4)+stacco*2]);
+    img = imcrop(img_HD, [main_Bordo(1)-stacco main_Bordo(2)-stacco main_Bordo(3)+stacco*2 main_Bordo(4)+stacco*2]);
 
     %figure, imshow(img), title('Crop');
 
@@ -92,15 +109,7 @@ end
     diocane = img;
 
     img = rgb2gray(img);
-    %img = sudokuEdge(img);
-    %figure, imshow(img), title('gray');
-    %figure, imshow(img), title('Edge');
 
-    %figure, imshow();
-
-    %img = imclose(img, ones(6));
-    %img = imerode(img, ones(3));
-    img(img == 0) = 0.5;
 
 
     %intervalloSauvola = max(main_Bordo(3), main_Bordo(4)) / 15;
@@ -111,11 +120,16 @@ end
 
     figure, imshow(img), title('bfvrfeseodews');
 
-    [H, theta, rho] = hough(img, 'Theta', -90);
+    img = edge(img, 'Canny');
+    figure, imshow(img), title('bfvrfeseodews');
+
+    img = imdilate(img, ones(3));
+
+    [H, theta, rho] = hough(img, 'Theta', 90);
 
     P = houghpeaks(H, 10, 'threshold', ceil(0.8 * max(H(:))));
 
-    lines = houghlines (img, theta, rho, P, 'FillGap', 5, 'MinLength', 7);
+    lines = houghlines (img, theta, rho, P, 'FillGap', 10, 'MinLength', 7);
 
     figure, imshow(img), hold on
 
@@ -176,10 +190,3 @@ end
     XXXBordi = proprietaaa(index).BoundingBox;
     img = imcrop(diocane, [XXXBordi(1) XXXBordi(2) XXXBordi(3) XXXBordi(4)]);
     figure, imshow(img), title('DIOCANE');
-
-
-
-
-
-
-end
