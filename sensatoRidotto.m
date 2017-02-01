@@ -150,10 +150,10 @@ end
 
 Nlist = cell(1, size(Cells.indexes, 2));
 
-tuned = load('tuned.mat');
+load('tuned.mat');
 
-%for index = 1 : size(Cells.indexes, 2)
-for index = 11 : 11
+for index = 1 : size(Cells.indexes, 2)
+%for index = 2 : 2
     BB = Cells.properties(Cells.indexes(index)).BoundingBox;
     centroide = Cells.properties(Cells.indexes(index)).Centroid;
     cut = ceil(0.1 * min([BB(3),BB(4)]));
@@ -166,9 +166,7 @@ for index = 11 : 11
         %figure, imshow(Nactual);
     somma = sum(Nactual(:));
     if somma > 1
-        x = ones(28)*255;
-        r = tuned(x(:));
-        %r = tuned(Nactual(:));
+        r = tunedNet(Nactual(:));
         Nactual = Nvalue(r, e);
     else
         Nactual = 0;
@@ -180,20 +178,7 @@ Nlist = cell2mat(Nlist);
 %%%%%%%%%%%%%%%%%%%% ORDINO I VALORI (VISTO CHE IL LABELING FA SCHIFO)
 % NON SO PENSARE
 
-NX = transpose(sortrows(Nlist', 2));
-NY = transpose(sortrows(Nlist', 3));
-NXV = NX(1,:);
-NYV = NY(1,:);
-k = 1;
-res = cell(1, 9);
-for i = 1 : 9 : 81
-    res{k} = sortrows(NX(i : i + 9), 3);
-    k = k + 1;
-end
-
-%res = cell2mat(res);
-%res = reshape(res ,[9 9]);
-
+stringa_numeri = ordinaCentroidi(Nlist);
 
 disp(['The End', char(10)]);
 end
