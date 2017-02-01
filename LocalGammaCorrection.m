@@ -3,7 +3,7 @@ function out = LocalGammaCorrection(im)
     %clear massimo;
     im = double(im);
 
-    pad = padarray(V, [2 2], 'symmetric');
+    pad = padarray(im, [2 2], 'symmetric');
 
 
     [rows, cols] = size(pad);
