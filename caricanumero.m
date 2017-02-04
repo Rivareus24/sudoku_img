@@ -2,12 +2,26 @@ function out = caricanumero(img)
         %figure, imshow(img);
     [labels, n] = bwlabel(img);
     prop = regionprops(labels, 'BoundingBox', 'EulerNumber', 'Area'); % SPOSTO QUESTO IN RIDOTTO
-    %figure, imagesc(labels), title('Labelling'), axis image;
-    temp = -1;
-    for i = 1 : n
-        if prop(i).Area > temp
-            break
+    figure, imagesc(labels), title('Labelling'), axis image;
+    [x,y] = size(img);
+    temp = x*y*0.05;
+    flag = true;
+    
+    if (n==0)  %completamente vuota
+        out = {zeros(28,28),0};
+        return
+    else
+        for i = 1 : n
+            if prop(i).Area > temp % controllo che sia effwttivamente un numero
+                flag = false; 
+                break
+            end
         end
+    end
+    
+    if(flag) %roba no numero
+        out = {zeros(28,28),0};
+        return
     end
 
     bordo = prop(i).BoundingBox;
