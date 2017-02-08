@@ -8,11 +8,10 @@
 close all
 clear all   % da togliere
 clc
-
-% 7,
-
-for Numero_Immagine = 31 : 31
-%%%%%%%%%%%%%%%%%%%% Scelgo l'immagine dal dataset immagini/
+% 31, 29, 15, 13, 1, 2,
+x = 15;
+for Numero_Immagine = x : x
+    %%%%%%%%%%%%%%%%%%%% Scelgo l'immagine dal dataset immagini/
 path = string('immagini/');
 img_Cells = Numero_Immagine;
 extension = ('.jpg');
@@ -26,11 +25,12 @@ Img = struct();
 %%%%%%%%%%%%%%%%%%%% Leggo l'immagine
 Img = Add_Property(Img, 'HD', Read_Img(path, img_Cells, extension));
 
+
 %%%%%%%%%%%%%%%%%%%% Salvo le dimensioni dell'immagine base
 [img_rows, img_cols, ~] = size(Img.HD);
 Img = Add_Property(Img, 'rows_HD', img_rows);
 Img = Add_Property(Img, 'cols_HD', img_cols);
-%Show_Img(Img.HD, 'Original');
+
 
 %%%%%%%%%%%%%%%%%%%% La scalo a 1000x1000 more or less
 [img_downScaled, ratio] = Down_Scale(Img.HD);
@@ -52,28 +52,20 @@ clear extension
 
 
 %%%%%%%%%%%%%%%%%%%% Miglioramento dell'immagine
-%Img.down_scaled = LocalGammaCorrection(Img.down_scaled);
 img_down_scaled_RGB = Img.down_scaled;
 Img.down_scaled = Enhancement(Img.down_scaled);
-% img_copy .^ media
-%Show_Img(Img.down_scaled, 'Gamma');
+
+
+%%%%%%%%%%%%%%%%%%%% Salvo l'immagine che cropperò e userò
+%%%%%%%%%%%%%%%%%%%% come base per le prossime labelling
+immagine_base = Img.down_scaled;
 
 
 %%%%%%%%%%%%%%%%%%%% Definisco gli edge
-%Img.down_scaled = Edge_Finder(Img.down_scaled);
-Img.down_scaled = edge(Img.down_scaled, 'canny');
-Img.down_scaled = imclose(Img.down_scaled, ones(5));
-base_Canny = Img.down_scaled;
-%Show_Img(Img.down_scaled, 'CANNY');
-
-%%%%%%%%%%%%%%%%%%%% Threshold      ?????? threshold&edge functions
-%Img.down_scaled = imclose(Img.down_scaled, ones(6));
-%Img.down_scaled = Threshold(Img.down_scaled);
-%Show_Img(Img.down_scaled, 'BW');
+Img.down_scaled = Edge_Finder(Img.down_scaled);
 
 
 %%%%%%%%%%%%%%%%%%%% Seleziono l'indice della componente connessa
-%%%%%%%%%%%%%%%%%%%% Posso girare l'immagine delle labels?
 [Img, sudoku_index] = Sudoku_Seeking(Img, Img.down_scaled);
 
 
@@ -89,28 +81,88 @@ angle = Sudoku_Rotation(Sudoku.CI);
 
 
 %%%%%%%%%%%%%%%%%%%% Ruoto il Sudoku dell'angolazione corretta
-%figure, imagesc(Img.labels);
 Img.labels = imrotate(Img.labels, angle);
 %figure, imagesc(Img.labels);
-base_Canny_dritta = imrotate(base_Canny, angle, 'bilinear');
-%img_down_scaled_RGB_dritta = imrotate(img_down_scaled_RGB, angle, 'bilinear');
-%Show_Img(img, 'des');
+immagine_base = imrotate(immagine_base, angle, 'bilinear');
+
 
 [Sudoku(:).properties] = regionprops(Img.labels, 'BoundingBox');
 
 b = round(Sudoku.properties(sudoku_index).BoundingBox);
-sudoku_face = imcrop(base_Canny_dritta, [b(1) b(2) b(3) b(4)]);
-%sudoku_face_temp = sudoku_face;         % XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-%figure, imshow(sudoku_face);
-%sudoku_face = rgb2gray(sudoku_face);
-%figure, imshow(img2);
+img22 = imcrop(immagine_base, [b(1) b(2) b(3) b(4)]);
+
+
+copia = img22;
+img22 = edge(img22, 'canny', [0.1, 0.3]);
+[sudoku_x sudoku_y] = size(img22);
+img22 = imdilate(img22, ones(5));
+
+
+%%%%%%%%%%%%%%%%%%%% TRASFORMATA HOUGH
+angoli = [0, 90];
+errore = 10;
+theta_ortogonale = [-90 : 1 : -90 + errore];
+theta_ortogonale = [theta_ortogonale, 0 - errore : 1 : 0 + errore];
+theta_ortogonale = [theta_ortogonale, 90 - errore : 1 : 89];
+[H, theta, rho] = hough(img22, 'theta', theta_ortogonale);
+
+%{
+figure
+imshow(imadjust(mat2gray(H)),[],...
+    'XData', theta,...
+    'YData', rho,...
+    'InitialMagnification','fit');
+    xlabel('\theta (degrees)')
+    ylabel('\rho')
+    axis on
+    axis normal
+    hold on
+    colormap(hot)
+%}
+    P = houghpeaks(H, 20,'threshold', ceil(0.3 * max(H(:))));
+
+%{
+    x = theta(P(:, 2));
+    y = rho(P(:, 1));
+    plot(x,y,'s','color','black')
+%}
+
+    dimensione_min = min(sudoku_x, sudoku_y);
+    lines = houghlines(img22, theta, rho, P, ...
+        'FillGap', dimensione_min * 0.3,'MinLength', dimensione_min * 0.8);
+
+    figure, imshow(copia), hold on
+    %max_len = 0;
+for k = 1 : length(lines)
+    xy = [lines(k).point1; lines(k).point2];
+    plot(xy(:, 1), xy(:, 2), 'LineWidth', 2, 'Color','green');
+
+    % Plot
+    %   beginnings (red)
+    %   and ends (blue) of lines
+    plot(xy(1, 1), xy(1, 2), 'x', 'LineWidth', 2, 'Color', 'red');
+    plot(xy(2, 1), xy(2, 2), 'x', 'LineWidth', 2, 'Color', 'blue');
+
+%{
+    % Determine the endpoints of the longest line segment
+    len = norm(lines(k).point1 - lines(k).point2);
+    if ( len > max_len)
+        max_len = len;
+        xy_long = xy;
+    end
+%}
+end
+
+%plot(xy_long(:, 1), xy_long(:, 2), 'LineWidth', 2, 'Color', 'red');
+
+%{
 
 %sudoku_face = sauvola(sudoku_face, [15 15], otsuthresh(imhist(sudoku_face)));
 %figure, imshow(img2);
 %sudoku_face = imopen(sudoku_face, ones(9));   % WARNING
 %figure, imshow(1 - sudoku_face);
 
-[labels, labels_Cells] = bwlabel(sudoku_face);
+[labels, labels_Cells] = bwlabel(img22);
 %figure, imagesc(labels), title('QUADRATO'), axis image;
 prop = regionprops(labels, ...
     'EulerNumber', 'Area', 'ConvexArea', 'BoundingBox', 'Centroid');
@@ -125,6 +177,7 @@ end
 Area_Cell = Area / 81;
 
 Cells = struct();
+%figure, imshow(1 - sudoku_face), title('sudoku_face');
 [labels, labels_Cells] = bwlabel(1 - sudoku_face);
 [Cells(:).labels] = labels;
 [Cells(:).labels_Cells] = labels_Cells;
@@ -133,33 +186,40 @@ Cells = struct();
     'Eccentricity', 'ConvexArea', 'BoundingBox', 'Centroid');
 
 
-
-% Inserisco l'indice delle 81 celle nell'array Cells
-% togliere da s1 e s2 un pezzo
-[s1, s2] = size(sudoku_face);
-
 [Cells(:).indexes] = [];
 for index = 1 : labels_Cells
-    if abs(Area_Cell - Cells.properties(index).ConvexArea) < (Area_Cell * 0.3) ...
+    if abs(Area_Cell - Cells.properties(index).ConvexArea) < (Area_Cell * 0.4) ...
             &&  Cells.properties(index).Eccentricity < 0.7 % quadrato circa 0.2
        Cells.indexes = [Cells.indexes, index];
     end
 end
 
-'Errore!! Non ha trovato tutte le celle' % CONTROLLO
+%'Errore!! Non ha trovato tutte le celle' % CONTROLLO
 
 Nlist = cell(1, size(Cells.indexes, 2));
+%}
 
+'Trovo le celle con le coordinate (rho)'
+
+%{
+if size(Cells.indexes, 2) ~= 81
+    disp(['Ha trovato ', num2str(size(Cells.indexes, 2)), ' celle']);
+end
+%}
+
+
+%%%%%%%%%%%%%%%%%%%% Carico la rete neurale
 load('tuned.mat');
 
-for index = 1 : size(Cells.indexes, 2)
-%for index = 2 : 2
+
+for index = 1 : 81
+%for index = 1 : 1
     BB = Cells.properties(Cells.indexes(index)).BoundingBox;
     centroide = Cells.properties(Cells.indexes(index)).Centroid;
-    cut = ceil(0.1 * min([BB(3),BB(4)]));
+    cut = ceil(0.1 * min([BB(3), BB(4)]));
     image = imcrop(sudoku_face, ...
         [BB(1) + cut BB(2) + cut BB(3) - 2 * cut BB(4) - 2 * cut]);
-        %figure, imshow(image);  % 9 bianco
+        %figure, imshow(image);
     booo = caricanumero(255 * image);
     Nactual = booo{1};
     e = booo{2};
@@ -179,6 +239,10 @@ Nlist = cell2mat(Nlist);
 % NON SO PENSARE
 
 stringa_numeri = ordinaCentroidi(Nlist);
+
+sudoku = reshape(stringa_numeri, [9 9]);
+
+sudoku = sudoku'
 
 disp(['The End', char(10)]);
 end

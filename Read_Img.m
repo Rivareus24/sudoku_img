@@ -6,4 +6,6 @@ function [img_downScaled, img_HD] = Read_Img(path, img_Number, extension)
     %++++++++++++++++ SCALA A QUALCOSA DI CIRCA 1000 x 1000 +++++++++++++
     img_downScaled = Down_Scale(img_HD);
 
+    %img_downScaled = imerode(img_downScaled, ones(3));
+
 end

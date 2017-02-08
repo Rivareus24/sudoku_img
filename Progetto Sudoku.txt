@@ -1,0 +1,43 @@
+Scale
+	riduco 1000x1000
+
+Migliorare Immagine
+	if (condition)
+		LocalGammaCorrection
+		Saturation - Clustering
+		
+Salviamo l'immagine BASE
+		
+EdgeDetection - Binarizzazione
+	Canny	0.1, 0.3, dilate->ones(5)
+	
+Labelling
+	Su (Img)
+	Identifichiamo il Sudoku(Griglia)
+
+Ruoti labels
+	Per avere la BB	dell'immagine girata
+	
+Ruotiamo BASE
+	per rendere la griglia ortogonale
+	
+Croppiamo
+	l'immagine BASE
+	
+Canny
+	Canny	0.1, 0.3, dilate->ones(5)
+
+Houghman
+
+Celle	
+	Identifichiamo le celle da BASE (GIRATA CROPPATA)
+		Labelling - Coordinate delle celle tramite l'array RHO
+	
+Riconoscimento numeri
+	Ciclo le celle
+		Crop la BB del numero
+		mando l'immagine alla NN
+		
+Salvo la stringa
+	input del sito che risolve il sudoku
+	
