@@ -137,9 +137,9 @@ for k = 1 : length(lines)
     xy = [lines(k).point1; lines(k).point2];
     plot(xy(:, 1), xy(:, 2), 'LineWidth', 2, 'Color','green');
 
-    % Plot
+    % Plot of lines
     %   beginnings (red)
-    %   and ends (blue) of lines
+    %   and ends (blue)
     plot(xy(1, 1), xy(1, 2), 'x', 'LineWidth', 2, 'Color', 'red');
     plot(xy(2, 1), xy(2, 2), 'x', 'LineWidth', 2, 'Color', 'blue');
 
@@ -201,12 +201,26 @@ Nlist = cell(1, size(Cells.indexes, 2));
 
 'Trovo le celle con le coordinate (rho)'
 
-%{
-if size(Cells.indexes, 2) ~= 81
-    disp(['Ha trovato ', num2str(size(Cells.indexes, 2)), ' celle']);
-end
-%}
 
+if length(lines) ~= 20
+    disp(['Ha trovato ', num2str(length(lines)), '/20 linee']);
+end
+
+oriz_lines = [];
+vert_lines = [];
+for i = 1 to length(lines)
+    if abs(lines.theta(i)) > 50
+        oriz_lines = [oriz_lines, lines.theta(i)];
+    else
+        vert_lines = [vert_lines, lines.theta(i)];
+    end
+end
+
+%%%%%%%%%%%%%% ordino i due array
+
+%%%%%%%%%%%%%% doppio for 10 x 10
+%%%%%%%%%%%%%% croppa la cella con i valori dei due array
+%%%%%%%%%%%%%% creo l'array di celle / chiamo direttamente la NN nel for
 
 %%%%%%%%%%%%%%%%%%%% Carico la rete neurale
 load('tuned.mat');
